@@ -1,2 +1,0 @@
-# BushBucks
-Zozi-test
