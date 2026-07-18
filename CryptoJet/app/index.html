@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/x-icon" href="/extra/jet.ico">
+  <link rel="stylesheet" href="/css/style.css">
+  <title>CryptoJet</title>
+</head>
+<body>
+  <header class="topbar" id="topbar"></header>
+
+  <main>
+    <div class="hero">
+      <h1 id="heroTitle">CryptoJet</h1>
+      <p id="heroSub">Your portfolio at a glance</p>
+    </div>
+
+    <div class="card">
+      <h2>Live prices</h2>
+      <div class="grid" id="priceGrid">Loading prices&hellip;</div>
+    </div>
+
+    <div class="card" id="walletSummaryCard" style="display:none;">
+      <h2>Your wallet</h2>
+      <div class="grid" id="walletGrid"></div>
+      <a class="btn" href="/wallet.html">View full wallet</a>
+    </div>
+  </main>
+
+  <footer class="site">CryptoJet &copy; 2026</footer>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/nav.js"></script>
+  <script>
+    renderNav('home');
+    const session = Session.get();
+
+    if (session) {
+      document.getElementById('heroTitle').textContent = `Welcome back, ${session.firstName}`;
+      document.getElementById('heroSub').textContent = 'Here\u2019s how your portfolio is doing today.';
+      document.getElementById('walletSummaryCard').style.display = 'block';
+
+      apiFetch(`/wallet/${session.clientId}`)
+        .then(data => {
+          const grid = document.getElementById('walletGrid');
+          grid.innerHTML = data.wallets.map(w => `
+            <div class="coin-card">
+              <h3>${w.coin}</h3>
+              <p class="value">${fmtUsd(w.valueUsd)}</p>
+              <p class="amount">${w.balance.toFixed(6)} ${w.coin}</p>
+            </div>
+          `).join('');
+        })
+        .catch(err => {
+          document.getElementById('walletGrid').textContent = err.message;
+        });
+    }
+
+    apiFetch('/prices')
+      .then(prices => {
+        const grid = document.getElementById('priceGrid');
+        grid.innerHTML = Object.entries(prices).map(([coin, rate]) => `
+          <div class="coin-card">
+            <h3>${coin}</h3>
+            <p class="value">${fmtUsd(rate)}</p>
+          </div>
+        `).join('');
+      })
+      .catch(err => {
+        document.getElementById('priceGrid').textContent = err.message;
+      });
+  </script>
+</body>
+</html>

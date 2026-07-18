@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/x-icon" href="/extra/jet.ico">
+  <link rel="stylesheet" href="/css/style.css">
+  <title>CryptoJet - Login</title>
+</head>
+<body>
+  <header class="topbar" id="topbar"></header>
+
+  <main>
+    <div class="card" style="max-width:420px;margin:40px auto;">
+      <h2>Sign in to continue</h2>
+      <form id="loginForm">
+        <label for="uname">Username</label>
+        <input type="text" id="uname" required>
+
+        <label for="psw">Password</label>
+        <input type="password" id="psw" required>
+
+        <button type="submit">Login</button>
+      </form>
+      <p id="msg" class="error"></p>
+      <p style="margin-top:20px;">No account yet? <a href="/register.html">Create one</a></p>
+    </div>
+  </main>
+
+  <footer class="site">CryptoJet &copy; 2026</footer>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/nav.js"></script>
+  <script>
+    renderNav('login');
+
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const msg = document.getElementById('msg');
+      msg.textContent = '';
+      try {
+        const data = await apiFetch('/login', {
+          method: 'POST',
+          body: JSON.stringify({
+            username: document.getElementById('uname').value,
+            password: document.getElementById('psw').value
+          })
+        });
+        Session.set(data);
+        window.location.href = '/index.html';
+      } catch (err) {
+        msg.textContent = err.message;
+      }
+    });
+  </script>
+</body>
+</html>

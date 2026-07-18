@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/x-icon" href="/extra/jet.ico">
+  <link rel="stylesheet" href="/css/style.css">
+  <title>CryptoJet - Trade</title>
+</head>
+<body>
+  <header class="topbar" id="topbar"></header>
+
+  <main>
+    <h1>Trade</h1>
+    <div class="card" style="max-width:480px;">
+      <form id="tradeForm">
+        <label for="coin">Coin</label>
+        <select id="coin">
+          <option value="BTC">Bitcoin (BTC)</option>
+          <option value="LTC">Litecoin (LTC)</option>
+          <option value="ETH">Ethereum (ETH)</option>
+          <option value="XRP">Ripple (XRP)</option>
+          <option value="USDC">USD Coin (USDC)</option>
+          <option value="XMR">Monero (XMR)</option>
+        </select>
+
+        <label for="amountUsd">Amount (USD)</label>
+        <input type="number" id="amountUsd" min="0.01" step="0.01" required>
+
+        <p class="amount" id="rateHint"></p>
+
+        <div class="row">
+          <button type="button" id="buyBtn">Buy</button>
+          <button type="button" id="sellBtn" class="secondary">Sell</button>
+        </div>
+      </form>
+      <p id="msg"></p>
+    </div>
+  </main>
+
+  <footer class="site">CryptoJet &copy; 2026</footer>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/nav.js"></script>
+  <script>
+    renderNav('trade');
+    const session = Session.requireLogin();
+    let prices = {};
+
+    function updateHint() {
+      const coin = document.getElementById('coin').value;
+      const rate = prices[coin];
+      document.getElementById('rateHint').textContent = rate
+        ? `1 ${coin} \u2248 ${fmtUsd(rate)}`
+        : '';
+    }
+
+    apiFetch('/prices').then(p => { prices = p; updateHint(); });
+    document.getElementById('coin').addEventListener('change', updateHint);
+
+    async function submitTrade(side) {
+      const msg = document.getElementById('msg');
+      msg.className = '';
+      msg.textContent = '';
+      const amountUsd = parseFloat(document.getElementById('amountUsd').value);
+      if (!(amountUsd > 0)) {
+        msg.className = 'error';
+        msg.textContent = 'Enter an amount greater than zero.';
+        return;
+      }
+      try {
+        const result = await apiFetch('/trade', {
+          method: 'POST',
+          body: JSON.stringify({
+            clientId: session.clientId,
+            coin: document.getElementById('coin').value,
+            side,
+            amountUsd
+          })
+        });
+        msg.className = 'success';
+        msg.textContent = `${side} complete. New ${result.coin} balance: ${result.newBalance.toFixed(6)}.`;
+      } catch (err) {
+        msg.className = 'error';
+        msg.textContent = err.message;
+      }
+    }
+
+    document.getElementById('buyBtn').addEventListener('click', () => submitTrade('BUY'));
+    document.getElementById('sellBtn').addEventListener('click', () => submitTrade('SELL'));
+  </script>
+</body>
+</html>
