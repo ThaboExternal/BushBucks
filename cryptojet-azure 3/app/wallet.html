@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/x-icon" href="/extra/jet.ico">
+  <link rel="stylesheet" href="/css/style.css">
+  <title>CryptoJet - Wallet</title>
+</head>
+<body>
+  <header class="topbar" id="topbar"></header>
+
+  <main>
+    <h1 id="acctTitle">Wallet</h1>
+    <div class="card">
+      <div class="grid" id="walletGrid">Loading&hellip;</div>
+    </div>
+  </main>
+
+  <footer class="site">CryptoJet &copy; 2026</footer>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/nav.js"></script>
+  <script>
+    renderNav('wallet');
+    const session = Session.requireLogin();
+    document.getElementById('acctTitle').textContent = `${session.firstName} ${session.lastName}'s wallet`;
+
+    apiFetch(`/wallet/${session.clientId}`)
+      .then(data => {
+        const grid = document.getElementById('walletGrid');
+        grid.innerHTML = data.wallets.map(w => `
+          <div class="coin-card">
+            <h3>${w.coin}</h3>
+            <p class="value">${fmtUsd(w.valueUsd)}</p>
+            <p class="amount">${w.balance.toFixed(6)} ${w.coin}</p>
+          </div>
+        `).join('');
+      })
+      .catch(err => {
+        document.getElementById('walletGrid').textContent = err.message;
+      });
+  </script>
+</body>
+</html>

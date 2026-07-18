@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/x-icon" href="/extra/jet.ico">
+  <link rel="stylesheet" href="/css/style.css">
+  <title>CryptoJet - Create account</title>
+</head>
+<body>
+  <header class="topbar" id="topbar"></header>
+
+  <main>
+    <div class="card" style="max-width:520px;margin:40px auto;">
+      <h2>Add new user</h2>
+      <form id="regForm">
+        <div class="row">
+          <div>
+            <label for="firstName">First name</label>
+            <input type="text" id="firstName" required>
+          </div>
+          <div>
+            <label for="lastName">Last name</label>
+            <input type="text" id="lastName" required>
+          </div>
+        </div>
+
+        <label for="username">Username</label>
+        <input type="text" id="username" required>
+
+        <label for="password">Password</label>
+        <input type="password" id="password" required
+               pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
+               title="At least 8 characters, one number, one uppercase and one lowercase letter">
+
+        <label for="email">Email</label>
+        <input type="email" id="email" required>
+
+        <label for="phone">Phone number</label>
+        <input type="tel" id="phone" placeholder="xxx-xxx-xxxx" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" required>
+
+        <label for="country">Country</label>
+        <select id="country" required>
+          <option value="South Africa">South Africa</option>
+          <option value="United States">United States</option>
+          <option value="United Kingdom">United Kingdom</option>
+          <option value="Canada">Canada</option>
+          <option value="Australia">Australia</option>
+          <option value="Germany">Germany</option>
+          <option value="France">France</option>
+          <option value="India">India</option>
+          <option value="Nigeria">Nigeria</option>
+          <option value="Brazil">Brazil</option>
+          <option value="Other">Other</option>
+        </select>
+
+        <label for="prefCoin">Preferred cryptocurrency</label>
+        <select id="prefCoin">
+          <option value="BTC">Bitcoin</option>
+          <option value="LTC">Litecoin</option>
+          <option value="ETH">Ethereum</option>
+          <option value="XRP">Ripple</option>
+          <option value="USDC">USD Coin</option>
+          <option value="XMR">Monero</option>
+        </select>
+
+        <button type="submit">Add</button>
+      </form>
+      <p id="msg" class="error"></p>
+    </div>
+  </main>
+
+  <footer class="site">CryptoJet &copy; 2026</footer>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/nav.js"></script>
+  <script>
+    renderNav('register');
+
+    document.getElementById('regForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const msg = document.getElementById('msg');
+      msg.textContent = '';
+      try {
+        await apiFetch('/register', {
+          method: 'POST',
+          body: JSON.stringify({
+            firstName: document.getElementById('firstName').value,
+            lastName: document.getElementById('lastName').value,
+            username: document.getElementById('username').value,
+            password: document.getElementById('password').value,
+            email: document.getElementById('email').value,
+            phone: document.getElementById('phone').value,
+            country: document.getElementById('country').value,
+            prefCoin: document.getElementById('prefCoin').value
+          })
+        });
+        window.location.href = '/login.html';
+      } catch (err) {
+        msg.textContent = err.message;
+      }
+    });
+  </script>
+</body>
+</html>
